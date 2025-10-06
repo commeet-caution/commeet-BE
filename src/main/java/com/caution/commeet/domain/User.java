@@ -1,32 +1,65 @@
 package com.caution.commeet.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
 
 @Entity
-@Table(name = "users") // 실제 DB 테이블 이름
+@Table(name = "users")
 @Getter
-@NoArgsConstructor // JPA는 기본 생성자
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE user SET deleted_at = CURRENT_TIMESTAMP where user_id = ?")
 public class User extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // DB가 ID를 자동으로 생성
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @NotNull
+    private String university;
+
+    @NotNull
+    private String department;
+
+    @NotNull
     private String email;
 
-    @Column(nullable = false)
+    @NotNull
+    @JsonIgnore
     private String password;
 
-    @Column(nullable = false)
+    @NotNull
     private String name;
 
-    @Enumerated(EnumType.STRING) // Enum 타입을 문자열로 저장
-    @Column(nullable = false)
-    private UserRole role;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private com.caution.commeet.domain.UserRole role;
 
-    private String department;
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider;
+
+    @Builder
+    public User(String university, String department, String email, String password,
+                String name, com.caution.commeet.domain.UserRole role, AuthProvider authProvider) {
+        this.university = university;
+        this.department = department;
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.role = role;
+        if (authProvider != null) this.authProvider = authProvider;
+    }
+
+    public User update(String name) {
+        this.name = name;
+
+        return this;
+    }
 }

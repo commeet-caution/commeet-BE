@@ -19,4 +19,6 @@ public abstract class BaseTimeEntity {
     @LastModifiedDate //마지막 수정시 Date 기록
     private LocalDateTime updatedAt;
 
+    private LocalDateTime deletedAt;
+
 }
