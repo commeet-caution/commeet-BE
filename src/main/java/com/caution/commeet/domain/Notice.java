@@ -24,4 +24,5 @@ public class Notice extends BaseTimeEntity {
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
+
 }
