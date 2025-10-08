@@ -1,6 +1,8 @@
 package com.caution.commeet.domain;
 
+import com.caution.commeet.exception.SlotAlreadyBookedException;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
@@ -37,8 +39,26 @@ public class AvailableSlot extends BaseTimeEntity {
      */
     public void book() {
         if (this.isBooked) {
-            throw new IllegalStateException("이미 예약 처리된 슬롯입니다.");
+            throw new SlotAlreadyBookedException();
         }
         this.isBooked = true;
     }
+
+    /**
+     * 이 슬롯을 예약 처리 상태(isBooked = false)로 변경
+     * 예약된 슬롯을 예약 가능한 슬롯으로 변경
+     */
+    public void makeAvailable() {
+        this.isBooked = false;
+    }
+
+    // 아래 생성자를 클래스 내부에 추가해주세요.
+    @Builder
+    public AvailableSlot(User professor, LocalDateTime startTime, LocalDateTime endTime) {
+        this.professor = professor;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.isBooked = false; // isBooked의 기본값도 여기서 설정해주는 것이 안전합니다.
+    }
+
 }

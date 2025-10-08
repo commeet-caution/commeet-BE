@@ -59,4 +59,18 @@ public class AvailableSlotRepository {
                 .setParameter("end", end)
                 .getResultList();
     }
+
+
+    /**
+     * 여러 개의 AvailableSlot 엔티티를 한 번에 저장합니다.
+     * 내부적으로 각 엔티티에 대해 persist를 호출합니다.
+     *
+     * @param slots 저장할 AvailableSlot 엔티티 리스트
+     */
+    public void saveAll(List<AvailableSlot> slots) {
+        for (AvailableSlot slot : slots) {
+            em.persist(slot);
+        }
+    }
+
 }
