@@ -22,25 +22,22 @@ public class User extends BaseTimeEntity {
     @Column(name = "user_id")
     private Long id;
 
-    @NotNull
     private String university;
 
-    @NotNull
     private String department;
 
     @NotNull
     private String email;
 
-    @NotNull
+    @Column(nullable = true)
     @JsonIgnore
     private String password;
 
     @NotNull
     private String name;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
-    private com.caution.commeet.domain.UserRole role;
+    private UserRole role;
 
     @Enumerated(EnumType.STRING)
     private AuthProvider authProvider;

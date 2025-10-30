@@ -25,13 +25,38 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation' // DTO 유효성 검증
+
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client' // OAuth2 소셜 로그인 기능
+	testImplementation 'org.springframework.security:spring-security-test' // Security 기능 테스트
+
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // JPA, Hibernate 등 데이터베이스 연동 기능
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	runtimeOnly 'com.h2database:h2' // 개발/테스트용 인메모리 DB
+
+	implementation 'org.springframework.boot:spring-boot-starter-websocket' // 웹소켓 기능
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis' // Redis 연동 기능
+	implementation group: 'org.webjars', name: 'stomp-websocket', version: '2.3.3-1' // STOMP 클라이언트 라이브러리 (WebJars)
+
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	implementation 'javax.xml.bind:jaxb-api:2.3.1'
+
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.671'
+
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.projectlombok:lombok'
+
+	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
