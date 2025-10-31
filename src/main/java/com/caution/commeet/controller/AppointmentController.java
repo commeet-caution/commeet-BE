@@ -1,10 +1,7 @@
 package com.caution.commeet.controller;
 
 import com.caution.commeet.domain.Appointment;
-import com.caution.commeet.dto.appointment.AppointmentCancelDto;
-import com.caution.commeet.dto.appointment.AppointmentConfirmDto;
-import com.caution.commeet.dto.appointment.AppointmentDto;
-import com.caution.commeet.dto.appointment.AppointmentRequestDto;
+import com.caution.commeet.dto.appointment.*;
 import com.caution.commeet.service.AppointmentQueryService;
 import com.caution.commeet.service.ReservationService;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +31,9 @@ public class AppointmentController {
      */
     @GetMapping("/student/{studentId}")
     public ResponseEntity<List<AppointmentDto>> getAppointmentsForStudent(@PathVariable Long studentId) {
-        // 3. Service를 호출하여 비즈니스 로직 수행
+        // Service를 호출하여 비즈니스 로직 수행
         List<AppointmentDto> appointments = appointmentQueryService.getAppointmentsForStudent(studentId);
-        // 4. 결과를 ResponseEntity에 담아 반환
+        // 결과를 ResponseEntity에 담아 반환
         return ResponseEntity.ok(appointments);
     }
 
@@ -97,5 +94,42 @@ public class AppointmentController {
         reservationService.cancelAppointment(requestDto.getUserId(), appointmentId, requestDto.getReason());
         return ResponseEntity.ok().build();
     }
+
+    /**
+     *
+     * [PATCH] /api/appointments/{appointmentId}/complete
+     *
+     * @param appointmentId 완료 처리할 예약의 ID
+     * @param requestDto    완료를 요청한 교수의 ID (professorId)
+     * @return 200 OK 상태 코드
+     */
+    @PatchMapping("/{appointmentId}/complete")
+    public ResponseEntity<Void> completeAppointment(
+            @PathVariable Long appointmentId,
+            @RequestBody AppointmentCompleteDto requestDto
+    ) {
+        reservationService.completeAppointment(requestDto.getProfessorId(), appointmentId);
+        return ResponseEntity.ok().build();
+    }
+
+
+
+    /**
+     * 학생이 면담 예약을 수정하는 API
+     * [PATCH] /api/appointments/{appointmentId}
+     *
+     * @param appointmentId 수정할 예약의 ID
+     * @param requestDto    수정할 내용(topic, message)과 본인 확인용 studentId
+     * @return 200 OK 상태 코드
+     */
+    @PatchMapping("/{appointmentId}")
+    public ResponseEntity<Void> updateAppointment(@PathVariable Long appointmentId,
+                                                  @RequestBody AppointmentUpdateRequestDto requestDto) {
+        reservationService.updateAppointment(appointmentId, requestDto);
+        return ResponseEntity.ok().build();
+    }
+
+
+
 
 }

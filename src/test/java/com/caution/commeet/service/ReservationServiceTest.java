@@ -3,6 +3,7 @@ package com.caution.commeet.service;
 
 import com.caution.commeet.domain.*;
 import com.caution.commeet.dto.appointment.AppointmentRequestDto;
+import com.caution.commeet.dto.appointment.AppointmentUpdateRequestDto;
 import com.caution.commeet.dto.availableslot.AvailableSlotCreateRequestDto;
 import com.caution.commeet.exception.SlotAlreadyBookedException;
 import com.caution.commeet.repository.AppointmentRepository;
@@ -365,6 +366,111 @@ class ReservationServiceTest {
 
         dto.setSlots(List.of(slot1));
         return dto;
+    }
+
+
+    // ================= Appointment Update Test =================
+
+    @Test
+    @DisplayName("학생이 면담 시간을 성공적으로 변경한다")
+    void updateAppointment_Success_ChangeSlot() {
+        // given - 테스트 준비
+        long studentId = 1L;
+        long appointmentId = 1L;
+        long newSlotId = 2L;
+
+        // 1. DTO 생성 및 값 설정
+        AppointmentUpdateRequestDto requestDto = new AppointmentUpdateRequestDto();
+        requestDto.setStudentId(studentId);
+        requestDto.setNewSlotId(newSlotId);
+        requestDto.setTopic(Topic.GRAD_SCHOOL);
+        requestDto.setStudentMessage("새로운 메시지");
+
+        // 2. 가짜 객체 생성
+        Appointment appointment = mock(Appointment.class);
+        User student = mock(User.class);
+        AvailableSlot newSlot = mock(AvailableSlot.class);
+
+        // 3. 가짜 객체 행동 정의
+        // 3-1. 첫 번째 em.find (Appointment 잠금)
+        when(em.find(Appointment.class, appointmentId, LockModeType.PESSIMISTIC_WRITE))
+                .thenReturn(appointment);
+
+        // 3-2. 권한 확인 로직
+        when(appointment.getStudent()).thenReturn(student);
+        when(student.getId()).thenReturn(studentId);
+
+        // 3-3. 두 번째 em.find (newSlot 잠금)
+        when(em.find(AvailableSlot.class, newSlotId, LockModeType.PESSIMISTIC_WRITE))
+                .thenReturn(newSlot);
+
+        // when - 실제 테스트 실행
+        reservationService.updateAppointment(appointmentId, requestDto);
+
+        // then - 결과 검증
+        // 4. 서비스가 올바른 값들로 엔티티의 update 메서드를 호출했는지 검증
+        verify(appointment).update(
+                requestDto.getTopic(),
+                requestDto.getStudentMessage(),
+                newSlot
+        );
+    }
+
+    @Test
+    @DisplayName("권한 없는 학생이 면담을 수정하려 하면 예외가 발생한다")
+    void updateAppointment_Fail_Unauthorized() {
+        // given
+        long realStudentId = 1L;
+        long fakeStudentId = 2L; // 다른 학생 ID
+        long appointmentId = 1L;
+
+        AppointmentUpdateRequestDto requestDto = new AppointmentUpdateRequestDto();
+        requestDto.setStudentId(fakeStudentId); // 요청 DTO에는 다른 학생 ID가 담김
+
+        Appointment appointment = mock(Appointment.class);
+        User realStudent = mock(User.class);
+
+        when(em.find(Appointment.class, appointmentId, LockModeType.PESSIMISTIC_WRITE))
+                .thenReturn(appointment);
+
+        when(appointment.getStudent()).thenReturn(realStudent);
+        when(realStudent.getId()).thenReturn(realStudentId); // 실제 예약의 학생 ID는 1L
+
+        // when & then - 실행 및 예외 검증
+        assertThrows(SecurityException.class, () -> {
+            reservationService.updateAppointment(appointmentId, requestDto);
+        });
+
+        // 4. 예외가 발생했으므로, update 메서드가 절대 호출되지 않았는지 검증
+        verify(appointment, never()).update(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("PENDING이 아닌 예약을 수정하려 하면 예외가 발생한다")
+    void updateAppointment_Fail_WrongStatus() {
+        // given
+        long studentId = 1L;
+        long appointmentId = 1L;
+        AppointmentUpdateRequestDto requestDto = new AppointmentUpdateRequestDto();
+        requestDto.setStudentId(studentId);
+
+        Appointment appointment = mock(Appointment.class);
+        User student = mock(User.class);
+
+        when(em.find(Appointment.class, appointmentId, LockModeType.PESSIMISTIC_WRITE))
+                .thenReturn(appointment);
+        when(appointment.getStudent()).thenReturn(student);
+        when(student.getId()).thenReturn(studentId);
+
+        // 3. [핵심] appointment.update()가 호출되면, IllegalStateException을 던지도록 설정
+        // (엔티티가 스스로 PENDING이 아님을 확인하고 예외를 던지는 상황을 시뮬레이션)
+        doThrow(new IllegalStateException("대기 중인 예약만 수정할 수 있습니다."))
+                .when(appointment).update(any(), any(), any());
+
+        // when & then
+        assertThrows(IllegalStateException.class, () -> {
+            reservationService.updateAppointment(appointmentId, requestDto);
+        });
     }
 
 }

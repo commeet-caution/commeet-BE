@@ -91,6 +91,44 @@ public class Appointment extends BaseTimeEntity {
         this.status = AppointmentStatus.COMPLETED;
     }
 
+    // domain/Appointment.java
+
+    /**
+     * 학생이 예약 내용을 수정합니다. (시간, 주제, 메시지)
+     * PENDING 상태일 때만 수정 가능합니다.
+     *
+     * @param newTopic       새로운 면담 주제 (null이면 변경 안 함)
+     * @param newMessage     새로운 메시지 (null이면 변경 안 함)
+     * @param newSlot        새로운 시간 슬롯 (null이면 변경 안 함)
+     */
+    public void update(Topic newTopic, String newMessage, AvailableSlot newSlot) {
+        // 1. PENDING 상태가 아니면 수정을 막는 방어 로직
+        if (this.status != AppointmentStatus.PENDING) {
+            throw new IllegalStateException("대기 중인 예약만 수정할 수 있습니다.");
+        }
+
+        // 2. 주제/메시지 업데이트 (null이 아닐 때만)
+        if (newTopic != null) {
+            this.topic = newTopic;
+        }
+        if (newMessage != null) {
+            this.studentMessage = newMessage;
+        }
+
+        // 3. 시간 슬롯 업데이트 (null이 아니고, 기존 슬롯과 다를 때만)
+        if (newSlot != null && !this.availableSlot.getId().equals(newSlot.getId())) {
+
+            // 3-1. 새 슬롯을 먼저 예약 시도 (실패 시 예외 발생)
+            newSlot.book();
+
+            // 3-2. 새 슬롯 예약 성공 -> 기존 슬롯을 다시 '예약 가능'으로 풀어줌
+            this.availableSlot.makeAvailable();
+
+            // 3-3. 예약을 새 슬롯으로 연결
+            this.availableSlot = newSlot;
+        }
+    }
+
 
 
 

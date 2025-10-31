@@ -2,6 +2,7 @@ package com.caution.commeet.service;
 
 import com.caution.commeet.domain.*; // 실제 프로젝트에 맞게 import 경로 설정 필요
 import com.caution.commeet.dto.appointment.AppointmentRequestDto;
+import com.caution.commeet.dto.appointment.AppointmentUpdateRequestDto;
 import com.caution.commeet.dto.availableslot.AvailableSlotCreateRequestDto;
 import com.caution.commeet.repository.AppointmentRepository;
 import com.caution.commeet.repository.AvailableSlotRepository;
@@ -162,6 +163,44 @@ public class ReservationService {
 
         // 3. 생성된 모든 AvailableSlot 엔티티를 한 번에 저장합니다.
         availableSlotRepository.saveAll(newSlots);
+    }
+
+
+    /**
+     * 학생이 신청한 면담 예약을 수정합니다. (시간, 주제, 메시지 변경 가능)
+     * PENDING 상태의 예약만 수정 가능합니다.
+     *
+     * @param appointmentId 수정할 예약 ID
+     * @param requestDto    수정할 내용(newSlotId, topic, studentMessage)과 학생 ID
+     */
+    @Transactional
+    public void updateAppointment(Long appointmentId, AppointmentUpdateRequestDto requestDto) {
+        // 1. [잠금] 기존 예약 (다른 요청이 이 예약을 수정/취소하지 못하게)
+        Appointment appointment = em.find(Appointment.class, appointmentId, LockModeType.PESSIMISTIC_WRITE);
+        if (appointment == null) {
+            throw new IllegalArgumentException("해당 예약을 찾을 수 없습니다.");
+        }
+
+        // 2. 권한 확인
+        if (!appointment.getStudent().getId().equals(requestDto.getStudentId())) {
+            throw new SecurityException("예약을 수정할 권한이 없습니다.");
+        }
+
+        AvailableSlot newSlot = null;
+
+        // 3. 새 슬롯 ID가 넘어온 경우
+        if (requestDto.getNewSlotId() != null) {
+            // 3-1. [잠금] 변경할 새 슬롯(다른 학생이 이 슬롯을 예약하지 못하게)
+            newSlot = em.find(AvailableSlot.class, requestDto.getNewSlotId(), LockModeType.PESSIMISTIC_WRITE);
+            if (newSlot == null) {
+                throw new IllegalArgumentException("변경하려는 시간이 존재하지 않습니다.");
+            }
+        }
+
+        // 4. 모든 로직을 엔티티에 위임 (엔티티가 알아서 null 체크 및 슬롯 변경 처리)
+        // newSlot.book()에서 예외가 터지면(SlotAlreadyBookedException)
+        // GlobalExceptionHandler가 처리
+        appointment.update(requestDto.getTopic(), requestDto.getStudentMessage(), newSlot);
     }
 
 
