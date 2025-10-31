@@ -1,17 +1,39 @@
 spring:
-  # ... (기존 설정 유지)
-  datasource: # 이 부분을 추가해야 합니다.
-    url: jdbc:h2:mem:testdb # 고정된 이름을 사용 (원하는 이름으로 설정 가능)
-    driver-class-name: org.h2.Driver
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update  # 엔티티 기반 테이블 자동 생성
+
+  datasource:
+    url: jdbc:h2:mem:commeetdb
     username: sa
-    password:
+    driver-class-name: org.h2.Driver
+
   h2:
     console:
       enabled: true
-      path: /h2-console # path 설정도 명시적으로 해주면 좋습니다.
+      path: /h2-console
+
+  sql:
+    init:
+      mode: never  # data.sql 없어도 오류 안 나도록
+#      mode: always
+
   security:
-    user:
-      name: user
-      password: mypassword
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+
 jwt:
-  issuer: ajufresh@gmail.com
+  issuer: commeet-inyro
+  secret_key: ${JWT_SECRET_KEY}
