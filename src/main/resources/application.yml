@@ -1,58 +1,39 @@
 spring:
-  application:
-    # 애플리케이션의 이름을 설정합니다.
-    name: commeet
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update  # 엔티티 기반 테이블 자동 생성
 
-  profiles:
-    # 활성화할 프로파일을 지정합니다.
-    # 환경 변수 'SPRING_PROFILES_ACTIVE'가 설정되어 있으면 그 값을 사용하고,
-    # 그렇지 않으면 기본값으로 'local'을 사용합니다.
-    active: ${SPRING_PROFILES_ACTIVE:local}
-
-  jackson:
-    serialization:
-      # Java의 Date 객체를 JSON으로 변환할 때 타임스탬프(숫자) 형식 대신
-      # ISO-8601 형식의 문자열(예: "2025-09-24T18:47:56")로 변환하도록 설정합니다.
-      WRITE_DATES_AS_TIMESTAMPS: false
-
-  # H2 데이터베이스 설정으로 변경된 부분
   datasource:
-    # H2 데이터베이스 드라이버 클래스 이름입니다.
-    driver-class-name: org.h2.Driver
-    # H2 데이터베이스 연결 URL입니다. 'mem:testdb'는 인메모리(In-Memory) 모드를 의미하며,
-    # 애플리케이션 실행 중에만 데이터가 메모리에 저장됩니다.
-    url: jdbc:h2:tcp://localhost/~/commeetDB
-    # H2 데이터베이스 기본 사용자 이름입니다.
+    url: jdbc:h2:mem:commeetdb
     username: sa
-    # H2 데이터베이스 기본 비밀번호입니다. (기본값은 비어있음)
-    password:
+    driver-class-name: org.h2.Driver
 
-  # H2 데이터베이스 콘솔 활성화 설정 (개발 편의 기능)
   h2:
     console:
-      # H2 콘솔을 활성화하여 웹 브라우저에서 데이터베이스를 관리할 수 있게 합니다.
-      # 기본적으로 '/h2-console' 경로로 접근할 수 있습니다.
       enabled: true
+      path: /h2-console
 
-server:
-  # 내장 웹 서버가 사용할 포트 번호입니다.
-  # 환경 변수 'PORT'가 있으면 그 값을 사용하고, 없으면 8080을 기본값으로 사용합니다.
-  port: ${PORT:8080}
+  sql:
+    init:
+      mode: never  # data.sql 없어도 오류 안 나도록
+#      mode: always
 
-management:
-  endpoints:
-    web:
-      exposure:
-        # Actuator 엔드포인트 중 외부에 노출할 항목을 지정합니다.
-        # 'health'와 'info' 엔드포인트만 노출하여 애플리케이션의 상태와 정보를 확인할 수 있게 합니다.
-        include: health,info
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            scope:
+              - email
+              - profile
 
-# Swagger / OpenAPI 설정
-springdoc:
-  api-docs:
-    # OpenAPI 3.0 명세서(JSON)가 제공될 경로를 설정합니다.
-    path: /v3/api-docs
-  swagger-ui:
-    # Swagger UI 페이지의 경로를 설정합니다.
-    # 설정된 경로 외에 '/swagger-ui.html'로 접근 시에도 자동으로 리다이렉트됩니다.
-    path: /swagger-ui/index.html
+jwt:
+  issuer: commeet-inyro
+  secret_key: ${JWT_SECRET_KEY}

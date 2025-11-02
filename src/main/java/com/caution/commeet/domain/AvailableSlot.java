@@ -2,15 +2,17 @@ package com.caution.commeet.domain;
 
 import com.caution.commeet.exception.SlotAlreadyBookedException;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "available_slots")
 @Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AvailableSlot extends BaseTimeEntity {
 
     @Id
@@ -28,6 +30,7 @@ public class AvailableSlot extends BaseTimeEntity {
     @Column(nullable = false)
     private LocalDateTime endTime;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean isBooked = false; // 기본값을 false로 설정
 
