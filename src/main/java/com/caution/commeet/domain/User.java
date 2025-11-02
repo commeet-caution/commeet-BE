@@ -40,7 +40,7 @@ public class User extends BaseTimeEntity {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private com.caution.commeet.domain.UserRole role;
+    private UserRole role;
 
     @Enumerated(EnumType.STRING)
     private AuthProvider authProvider;
