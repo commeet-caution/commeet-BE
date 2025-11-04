@@ -5,14 +5,13 @@ import com.caution.commeet.dto.appointment.AppointmentRequestDto;
 import com.caution.commeet.dto.appointment.AppointmentUpdateRequestDto;
 import com.caution.commeet.dto.availableslot.AvailableSlotCreateRequestDto;
 import com.caution.commeet.repository.AppointmentRepository;
-import com.caution.commeet.repository.AvailableSlotRepository;
+import com.caution.commeet.repository.AvailabilityRepository;
 import com.caution.commeet.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
-import jakarta.persistence.PersistenceContext;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,12 +21,8 @@ import java.util.stream.Collectors;
 public class ReservationService {
 
     private final UserRepository userRepository;
-    private final AvailableSlotRepository availableSlotRepository;
+    private final AvailabilityRepository availabilityRepository;
     private final AppointmentRepository appointmentRepository;
-
-    private final EntityManager em;
-
-
 
     /**
      * 학생이 면담 예약을 '신청'하는 메서드
@@ -40,8 +35,8 @@ public class ReservationService {
         User student = userRepository.findById(requestDto.getStudentId())
                 .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
 
-        AvailableSlot slot = em.find(AvailableSlot.class, requestDto.getSlotId(), LockModeType.PESSIMISTIC_WRITE);
-        // ... null 체크 ...
+        AvailableSlot slot = availabilityRepository.findWithLockById(requestDto.getSlotId())
+                .orElseThrow(() -> new IllegalArgumentException("예약 가능한 시간이 아닙니다."));
 
         slot.book();
 
@@ -54,9 +49,8 @@ public class ReservationService {
                 .studentMessage(requestDto.getStudentMessage()) // DTO에서 받은 메시지를 엔티티에 설정
                 .build();
 
-        appointmentRepository.save(newAppointment);
+        return appointmentRepository.save(newAppointment);
 
-        return newAppointment;
     }
 
 
@@ -162,7 +156,7 @@ public class ReservationService {
                 .collect(Collectors.toList());
 
         // 3. 생성된 모든 AvailableSlot 엔티티를 한 번에 저장합니다.
-        availableSlotRepository.saveAll(newSlots);
+        availabilityRepository.saveAll(newSlots);
     }
 
 
@@ -176,10 +170,9 @@ public class ReservationService {
     @Transactional
     public void updateAppointment(Long appointmentId, AppointmentUpdateRequestDto requestDto) {
         // 1. [잠금] 기존 예약 (다른 요청이 이 예약을 수정/취소하지 못하게)
-        Appointment appointment = em.find(Appointment.class, appointmentId, LockModeType.PESSIMISTIC_WRITE);
-        if (appointment == null) {
-            throw new IllegalArgumentException("해당 예약을 찾을 수 없습니다.");
-        }
+        Appointment appointment = appointmentRepository.findWithLockById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
+
 
         // 2. 권한 확인
         if (!appointment.getStudent().getId().equals(requestDto.getStudentId())) {
@@ -191,10 +184,8 @@ public class ReservationService {
         // 3. 새 슬롯 ID가 넘어온 경우
         if (requestDto.getNewSlotId() != null) {
             // 3-1. [잠금] 변경할 새 슬롯(다른 학생이 이 슬롯을 예약하지 못하게)
-            newSlot = em.find(AvailableSlot.class, requestDto.getNewSlotId(), LockModeType.PESSIMISTIC_WRITE);
-            if (newSlot == null) {
-                throw new IllegalArgumentException("변경하려는 시간이 존재하지 않습니다.");
-            }
+            newSlot = availabilityRepository.findWithLockById(requestDto.getNewSlotId())
+                    .orElseThrow(() -> new IllegalArgumentException("변경하려는 시간이 존재하지 않습니다."));
         }
 
         // 4. 모든 로직을 엔티티에 위임 (엔티티가 알아서 null 체크 및 슬롯 변경 처리)

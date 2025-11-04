@@ -7,7 +7,7 @@ import com.caution.commeet.dto.appointment.AppointmentUpdateRequestDto;
 import com.caution.commeet.dto.availableslot.AvailableSlotCreateRequestDto;
 import com.caution.commeet.exception.SlotAlreadyBookedException;
 import com.caution.commeet.repository.AppointmentRepository;
-import com.caution.commeet.repository.AvailableSlotRepository;
+import com.caution.commeet.repository.AvailabilityRepository;
 import com.caution.commeet.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
@@ -35,7 +35,7 @@ class ReservationServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private AvailableSlotRepository availableSlotRepository;
+    private AvailabilityRepository availableSlotRepository;
 
     @Mock
     private AppointmentRepository appointmentRepository;
@@ -73,9 +73,11 @@ class ReservationServiceTest {
 
         // "userRepository.findById(1L)가 호출되면, 가짜 student 객체를 반환해줘" 라고 설정
         when(userRepository.findById(studentId)).thenReturn(Optional.of(student));
-        // "em.find(...)가 호출되면, 가짜 slot 객체를 반환해줘" 라고 설정
-        when(em.find(AvailableSlot.class, slotId, LockModeType.PESSIMISTIC_WRITE)).thenReturn(slot);
+        when(availableSlotRepository.findWithLockById(slotId))
+                .thenReturn(Optional.of(slot));
 
+        when(appointmentRepository.save(any(Appointment.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         // when - 실제 테스트 실행
         Appointment newAppointment = reservationService.requestAppointment(requestDto);
@@ -141,7 +143,7 @@ class ReservationServiceTest {
         AvailableSlot slot = mock(AvailableSlot.class);
 
         when(userRepository.findById(studentId)).thenReturn(Optional.of(student));
-        when(em.find(AvailableSlot.class, slotId, LockModeType.PESSIMISTIC_WRITE)).thenReturn(slot);
+        when(availableSlotRepository.findWithLockById(slotId)).thenReturn(Optional.of(slot));
 
         // [핵심] slot.book() 메서드가 호출되면, SlotAlreadyBookedException을 던지도록 설정
         doThrow(new SlotAlreadyBookedException()).when(slot).book();
@@ -393,16 +395,16 @@ class ReservationServiceTest {
 
         // 3. 가짜 객체 행동 정의
         // 3-1. 첫 번째 em.find (Appointment 잠금)
-        when(em.find(Appointment.class, appointmentId, LockModeType.PESSIMISTIC_WRITE))
-                .thenReturn(appointment);
+        when(appointmentRepository.findWithLockById(appointmentId))
+                .thenReturn(Optional.of(appointment));
 
         // 3-2. 권한 확인 로직
         when(appointment.getStudent()).thenReturn(student);
         when(student.getId()).thenReturn(studentId);
 
         // 3-3. 두 번째 em.find (newSlot 잠금)
-        when(em.find(AvailableSlot.class, newSlotId, LockModeType.PESSIMISTIC_WRITE))
-                .thenReturn(newSlot);
+        when(availableSlotRepository.findWithLockById(newSlotId))
+                .thenReturn(Optional.of(newSlot));
 
         // when - 실제 테스트 실행
         reservationService.updateAppointment(appointmentId, requestDto);
@@ -430,8 +432,8 @@ class ReservationServiceTest {
         Appointment appointment = mock(Appointment.class);
         User realStudent = mock(User.class);
 
-        when(em.find(Appointment.class, appointmentId, LockModeType.PESSIMISTIC_WRITE))
-                .thenReturn(appointment);
+        when(appointmentRepository.findWithLockById(appointmentId)).
+                thenReturn(Optional.of(appointment));
 
         when(appointment.getStudent()).thenReturn(realStudent);
         when(realStudent.getId()).thenReturn(realStudentId); // 실제 예약의 학생 ID는 1L
@@ -457,8 +459,8 @@ class ReservationServiceTest {
         Appointment appointment = mock(Appointment.class);
         User student = mock(User.class);
 
-        when(em.find(Appointment.class, appointmentId, LockModeType.PESSIMISTIC_WRITE))
-                .thenReturn(appointment);
+        when(appointmentRepository.findWithLockById(appointmentId)).
+                thenReturn(Optional.of(appointment));
         when(appointment.getStudent()).thenReturn(student);
         when(student.getId()).thenReturn(studentId);
 
