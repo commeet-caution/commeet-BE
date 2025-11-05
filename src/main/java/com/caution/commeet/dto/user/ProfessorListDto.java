@@ -17,7 +17,7 @@ public class ProfessorListDto {
                 professor.getId(),
                 professor.getName(),
                 professor.getDepartment(),
-                professor.getEmail()
+                professor.getLoginId()
         );
     }
 

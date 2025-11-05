@@ -21,7 +21,7 @@ public class UserRepositoryImpl implements  UserRepositoryCustom {
     public List<User> searchProfessors(String department, String name) {
         StringBuilder jpql = new StringBuilder("SELECT u FROM User u WHERE u.role = :role");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("role", UserRole.PROFESSOR);
+        parameters.put("role", UserRole.ROLE_PROFESSOR);
 
         if (department != null && !department.isBlank()) {
             jpql.append(" AND u.department = :department");
