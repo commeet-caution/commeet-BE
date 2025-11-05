@@ -34,7 +34,6 @@ public class AvailabilityService {
                 .professor(professor)
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
-                .isBooked(false)
                 .build();
 
         AvailableSlot savedSlot = availabilityRepository.save(slot);

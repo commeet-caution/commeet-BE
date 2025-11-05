@@ -3,6 +3,7 @@ package com.caution.commeet.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -49,7 +50,14 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/register", "/api/login", "/api/login-success", "/api/login-fail").permitAll()
+                        .requestMatchers("/api/register", "/api/login-success", "/api/login-fail", "/api/logout-success").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/availability").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/availability/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/availability/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/availability/**").authenticated()
+
+                        .requestMatchers("/api/")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

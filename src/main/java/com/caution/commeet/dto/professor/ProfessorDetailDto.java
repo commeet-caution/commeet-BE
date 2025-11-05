@@ -45,7 +45,7 @@ public class ProfessorDetailDto {
         this.professorId = professor.getId();
         this.name = professor.getName();
         this.department = professor.getDepartment();
-        this.email = professor.getEmail();
+        this.email = professor.getLoginId();
 
         // 프로필이 null일 수도 있으므로 방어 코드 작성
         this.profileContent = (profile != null) ? profile.getContent() : null;

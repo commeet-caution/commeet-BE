@@ -1,13 +1,10 @@
 package com.caution.commeet.service;
 
-import com.caution.commeet.domain.AvailableSlot;
 import com.caution.commeet.domain.Profile;
 import com.caution.commeet.domain.User;
 import com.caution.commeet.dto.AvailabilityResponse;
 import com.caution.commeet.dto.professor.ProfessorDetailDto;
 import com.caution.commeet.dto.user.ProfessorListDto;
-
-import com.caution.commeet.repository.AvailabilityRepository;
 import com.caution.commeet.repository.ProfileRepository;
 import com.caution.commeet.repository.UserRepository;
 

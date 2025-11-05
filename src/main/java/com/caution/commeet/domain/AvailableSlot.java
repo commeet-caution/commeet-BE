@@ -55,13 +55,13 @@ public class AvailableSlot extends BaseTimeEntity {
         this.isBooked = false;
     }
 
-    // 아래 생성자를 클래스 내부에 추가해주세요.
-    @Builder
-    public AvailableSlot(User professor, LocalDateTime startTime, LocalDateTime endTime) {
-        this.professor = professor;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.isBooked = false; // isBooked의 기본값도 여기서 설정해주는 것이 안전합니다.
-    }
+//    // 아래 생성자를 클래스 내부에 추가해주세요.
+//    @Builder
+//    public AvailableSlot(User professor, LocalDateTime startTime, LocalDateTime endTime) {
+//        this.professor = professor;
+//        this.startTime = startTime;
+//        this.endTime = endTime;
+//        this.isBooked = false; // isBooked의 기본값도 여기서 설정해주는 것이 안전합니다.
+//    }
 
 }
