@@ -1,34 +1,47 @@
 package com.caution.commeet.service;
 
+import com.caution.commeet.domain.User;
+import com.caution.commeet.domain.UserRole;
+import com.caution.commeet.dto.AddUserRequest;
+import com.caution.commeet.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.caution.commeet.domain.User;
-import com.caution.commeet.dto.AddUserRequest;
-import com.caution.commeet.repository.UserRepository;
 
 @RequiredArgsConstructor
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public Long save(AddUserRequest dto) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    /**
+     * 회원가입 (비밀번호 암호화 + 기본 권한 설정)
+     */
+    public Long register(AddUserRequest dto) {
+        User user = User.builder()
+                .loginId(dto.getLoginId())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .name(dto.getName())
+                .university(dto.getUniversity())
+                .department(dto.getDepartment())
+                .role(dto.getRole() != null ? dto.getRole() : UserRole.ROLE_STUDENT)
+                .build();
 
-        return userRepository.save(User.builder()
-                .email(dto.getEmail())
-                .password(encoder.encode(dto.getPassword()))
-                .build()).getId();
+        return userRepository.save(user).getId();
     }
 
-    public User findById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Unexpected user"));
-    }
+    /**
+     * 로그인 (비밀번호 검증 포함)
+     */
+    public User login(String loginId, String password, UserRole role) {
+        User user = userRepository.findByLoginIdAndRole(loginId, role)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Unexpected User"));
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        return user;
     }
 }
