@@ -3,18 +3,13 @@ package com.caution.commeet.service;
 import com.caution.commeet.domain.*; // 실제 프로젝트에 맞게 import 경로 설정 필요
 import com.caution.commeet.dto.appointment.AppointmentRequestDto;
 import com.caution.commeet.dto.appointment.AppointmentUpdateRequestDto;
-import com.caution.commeet.dto.availableslot.AvailableSlotCreateRequestDto;
 import com.caution.commeet.repository.AppointmentRepository;
 import com.caution.commeet.repository.AvailabilityRepository;
 import com.caution.commeet.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -130,33 +125,6 @@ public class ReservationService {
 
         // 3. 상태 변경 로직을 Appointment 엔티티에 위임
         appointment.complete();
-    }
-
-
-    // ReservationService.java 클래스 안에 이어서 추가
-
-    /**
-     * 교수가 여러 개의 상담 가능 시간을 등록합니다.
-     *
-     * @param requestDto 등록할 교수의 ID와 시간 정보(시작/종료) 리스트를 담은 DTO
-     */
-    @Transactional
-    public void createAvailableSlots(AvailableSlotCreateRequestDto requestDto) {
-        // 1. 교수 엔티티를 조회
-        User professor = userRepository.findById(requestDto.getProfessorId())
-                .orElseThrow(() -> new IllegalArgumentException("교수를 찾을 수 없습니다."));
-
-        // 2. DTO로부터 시간 정보 리스트를 가져와 AvailableSlot 엔티티 리스트로 변환
-        List<AvailableSlot> newSlots = requestDto.getSlots().stream()
-                .map(slotInfo -> new AvailableSlot( // AvailableSlot 엔티티에 적절한 생성자 필요
-                        professor,
-                        slotInfo.getStartTime(),
-                        slotInfo.getEndTime()
-                ))
-                .collect(Collectors.toList());
-
-        // 3. 생성된 모든 AvailableSlot 엔티티를 한 번에 저장합니다.
-        availabilityRepository.saveAll(newSlots);
     }
 
 

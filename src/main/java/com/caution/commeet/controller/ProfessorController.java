@@ -1,5 +1,6 @@
 package com.caution.commeet.controller;
 
+import com.caution.commeet.dto.professor.ProfessorDetailDto;
 import com.caution.commeet.dto.user.ProfessorListDto;
 import com.caution.commeet.service.ProfessorQueryService;
 import lombok.Getter;
@@ -39,4 +40,16 @@ public class ProfessorController {
 
     }
 
+    /**
+     * 특정 교수의 상세 정보를 조회하는 API
+     * [GET] /api/professors/{professorId}
+     *
+     * @param professorId 조회할 교수의 ID
+     * @return 200 OK 상태 코드와 함께 교수의 상세 정보 DTO를 반환
+     */
+    @GetMapping("/{professorId}")
+    public ResponseEntity<ProfessorDetailDto> getProfessorDetails(@PathVariable Long professorId) {
+        ProfessorDetailDto details = professorQueryService.getProfessorDetails(professorId);
+        return ResponseEntity.ok(details);
+    }
 }

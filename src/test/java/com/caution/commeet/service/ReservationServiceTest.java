@@ -4,13 +4,11 @@ package com.caution.commeet.service;
 import com.caution.commeet.domain.*;
 import com.caution.commeet.dto.appointment.AppointmentRequestDto;
 import com.caution.commeet.dto.appointment.AppointmentUpdateRequestDto;
-import com.caution.commeet.dto.availableslot.AvailableSlotCreateRequestDto;
 import com.caution.commeet.exception.SlotAlreadyBookedException;
 import com.caution.commeet.repository.AppointmentRepository;
 import com.caution.commeet.repository.AvailabilityRepository;
 import com.caution.commeet.repository.UserRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -317,58 +315,7 @@ class ReservationServiceTest {
     }
 
 
-    /**
-     * 교수가 상담 가능 시간을 성공적으로 등록하는 시나리오를 테스트
-     *
-     * 테스트 흐름:
-     * 1. 교수 정보와 상담 시간 정보를 포함한 DTO 생성
-     * 2. 교수 조회 후 슬롯 생성 및 저장
-     *
-     * 기대 결과:
-     * - availableSlotRepository.saveAll(...) 메서드가 호출됨
-     */
 
-
-    @Test
-    @DisplayName("교수가 상담 가능 시간을 성공적으로 등록한다")
-    void createAvailableSlots_Success() {
-        // given
-        long professorId = 1L;
-        AvailableSlotCreateRequestDto requestDto = createSlotRequestDto(professorId);
-        User professor = mock(User.class);
-
-        when(userRepository.findById(professorId)).thenReturn(Optional.of(professor));
-
-        // when
-        reservationService.createAvailableSlots(requestDto);
-
-        // then
-        verify(availableSlotRepository).saveAll(any(List.class));
-    }
-
-    /**
-     * 테스트용 AvailableSlotCreateRequestDto 객체를 생성한다.
-     *
-     * 입력값:
-     * - professorId: 상담 가능 시간을 등록할 교수의 ID
-     *
-     * 설정값:
-     * - 1개의 SlotInfo 객체를 생성하여 DTO에 설정
-     *
-     * 반환값:
-     * - 상담 가능 시간 정보가 포함된 DTO 객체
-     */
-    private AvailableSlotCreateRequestDto createSlotRequestDto(long professorId) {
-        AvailableSlotCreateRequestDto dto = new AvailableSlotCreateRequestDto();
-        dto.setProfessorId(professorId);
-
-        AvailableSlotCreateRequestDto.SlotInfo slot1 = new AvailableSlotCreateRequestDto.SlotInfo();
-        slot1.setStartTime(LocalDateTime.now().plusDays(1));
-        slot1.setEndTime(LocalDateTime.now().plusDays(1).plusHours(1));
-
-        dto.setSlots(List.of(slot1));
-        return dto;
-    }
 
 
     // ================= Appointment Update Test =================
