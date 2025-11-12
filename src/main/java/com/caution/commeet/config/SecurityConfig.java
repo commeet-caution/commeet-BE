@@ -57,7 +57,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/availability/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/availability/**").authenticated()
 
-                        .requestMatchers("/api/")
+                        .requestMatchers(HttpMethod.GET, "/api/professors/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/appointments/**").authenticated()
+                        .requestMatchers("/api/appointments/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
