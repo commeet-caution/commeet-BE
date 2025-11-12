@@ -34,7 +34,8 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // JPA, Hibernate 등 데이터베이스 연동 기능
 	runtimeOnly 'com.mysql:mysql-connector-j'
-	runtimeOnly 'com.h2database:h2' // 개발/테스트용 인메모리 DB
+	runtimeOnly 'com.h2database:h2'
+	implementation 'io.github.cdimascio:dotenv-java:3.0.0' // (버전은 최신 버전을 확인하세요)
 
 	implementation 'org.springframework.boot:spring-boot-starter-websocket' // 웹소켓 기능
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis' // Redis 연동 기능

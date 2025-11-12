@@ -17,7 +17,7 @@ public class ProfessorDetailDto {
     private final Long professorId;
     private final String name;
     private final String department;
-    private final String email;
+
 
     //2. 교수 프로필 정보
     private final String profileContent; // Profile 엔티티의 content
@@ -45,7 +45,7 @@ public class ProfessorDetailDto {
         this.professorId = professor.getId();
         this.name = professor.getName();
         this.department = professor.getDepartment();
-        this.email = professor.getLoginId();
+
 
         // 프로필이 null일 수도 있으므로 방어 코드 작성
         this.profileContent = (profile != null) ? profile.getContent() : null;

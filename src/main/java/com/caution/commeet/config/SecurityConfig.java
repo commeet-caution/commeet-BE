@@ -57,7 +57,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/availability/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/availability/**").authenticated()
 
-                        .requestMatchers("/api/")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
