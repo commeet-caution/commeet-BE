@@ -2,6 +2,7 @@ package com.caution.commeet.service;
 
 
 import com.caution.commeet.domain.*;
+import com.caution.commeet.dto.appointment.AppointmentDto;
 import com.caution.commeet.dto.appointment.AppointmentRequestDto;
 import com.caution.commeet.dto.appointment.AppointmentUpdateRequestDto;
 import com.caution.commeet.exception.SlotAlreadyBookedException;
@@ -15,9 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -58,35 +56,40 @@ class ReservationServiceTest {
      */
 
 
-    @Test // 4. 이 메서드가 테스트 메서드임을 선언
+    @Test
     @DisplayName("학생이 면담 예약을 성공적으로 신청한다")
     void requestAppointment_Success() {
-        // given - 테스트 준비 (가짜 객체들이 어떻게 행동할지 정의)
+        // given - 테스트 준비
         long studentId = 1L;
         long slotId = 1L;
         AppointmentRequestDto requestDto = createRequestDto(studentId, slotId);
 
-        User student = mock(User.class); // 가짜 학생, 교수, 슬롯 객체 생성
+        User student = mock(User.class);
         AvailableSlot slot = mock(AvailableSlot.class);
+        User professor = mock(User.class); // DTO 변환을 위해 교수 객체도 필요
 
-        // "userRepository.findById(1L)가 호출되면, 가짜 student 객체를 반환해줘" 라고 설정
+        // 1. Mock 행동 정의
         when(userRepository.findById(studentId)).thenReturn(Optional.of(student));
-        when(availableSlotRepository.findWithLockById(slotId))
-                .thenReturn(Optional.of(slot));
+        when(availableSlotRepository.findWithLockById(slotId)).thenReturn(Optional.of(slot));
 
+        // DTO 변환 과정에서 slot.getProfessor() 등을 호출하므로 설정 필요
+        when(slot.getProfessor()).thenReturn(professor);
+        when(student.getName()).thenReturn("김학생");
+        when(professor.getName()).thenReturn("박교수");
+
+        // save가 호출되면 인자로 넘어온 Entity를 그대로 반환하도록 설정
         when(appointmentRepository.save(any(Appointment.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // when - 실제 테스트 실행
-        Appointment newAppointment = reservationService.requestAppointment(requestDto);
-
+        AppointmentDto resultDto = reservationService.requestAppointment(requestDto);
 
         // then - 결과 검증
-        assertNotNull(newAppointment); // 1. 생성된 예약 객체가 null이 아닌지 확인
-        assertEquals(AppointmentStatus.PENDING, newAppointment.getStatus()); // 2. 예약 상태가 PENDING이 맞는지 확인
+        assertNotNull(resultDto);
+        assertEquals(AppointmentStatus.PENDING, resultDto.getStatus()); // DTO의 상태 확인
 
-        verify(slot).book(); // 3. slot 객체의 book() 메서드가 '반드시 한 번' 호출되었는지 확인
-        verify(appointmentRepository).save(any(Appointment.class)); // 4. repository의 save가 '어떤 Appointment 객체로든' 호출되었는지 확인
+        verify(slot).book();
+        verify(appointmentRepository).save(any(Appointment.class));
     }
 
 
