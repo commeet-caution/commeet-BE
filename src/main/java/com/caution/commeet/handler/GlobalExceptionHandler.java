@@ -2,6 +2,7 @@ package com.caution.commeet.handler;
 
 import com.caution.commeet.dto.ErrorResponse;
 import com.caution.commeet.exception.BusinessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,5 +18,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(e.getMessage()));
+    }
+
+    /**
+     * DB 제약조건 위반 (Unique Key 등) 발생 시 처리
+     * 예: 이미 가입된 아이디(탈퇴 회원 포함)로 가입 시도 시 발생
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        // 1. 에러 로그를 남겨서 나중에 확인 (선택 사항)
+        // log.warn("Data Integrity Violation: {}", e.getMessage());
+
+        // 2. 클라이언트에게 409 Conflict 상태 코드와 메시지 반환
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("이미 사용 중인 아이디입니다."));
     }
 }
