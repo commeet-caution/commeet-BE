@@ -1,6 +1,7 @@
 package com.caution.commeet.service;
 
 import com.caution.commeet.domain.*; // 실제 프로젝트에 맞게 import 경로 설정 필요
+import com.caution.commeet.dto.appointment.AppointmentDto;
 import com.caution.commeet.dto.appointment.AppointmentRequestDto;
 import com.caution.commeet.dto.appointment.AppointmentUpdateRequestDto;
 import com.caution.commeet.repository.AppointmentRepository;
@@ -26,7 +27,7 @@ public class ReservationService {
      * @return 생성된 Appointment 엔티티 (상태: PENDING)
      */
     @Transactional
-    public Appointment requestAppointment(AppointmentRequestDto requestDto) { // 파라미터를 DTO로 받도록 변경
+    public AppointmentDto requestAppointment(AppointmentRequestDto requestDto) { // 파라미터를 DTO로 받도록 변경
         User student = userRepository.findById(requestDto.getStudentId())
                 .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
 
@@ -37,14 +38,16 @@ public class ReservationService {
 
         Appointment newAppointment = Appointment.builder()
                 .student(student)
-                .professor(slot.getProfessor())
+                .professor(slot.getProfessor()) // 2. @Transactional 안이라서 LAZY 로딩 성공
                 .availableSlot(slot)
                 .topic(requestDto.getTopic())
                 .status(AppointmentStatus.PENDING)
-                .studentMessage(requestDto.getStudentMessage()) // DTO에서 받은 메시지를 엔티티에 설정
+                .studentMessage(requestDto.getStudentMessage())
                 .build();
 
-        return appointmentRepository.save(newAppointment);
+        Appointment savedAppointment = appointmentRepository.save(newAppointment);
+
+        return AppointmentDto.from(savedAppointment);
 
     }
 

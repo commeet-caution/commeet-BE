@@ -24,7 +24,11 @@ public class Appointment extends BaseTimeEntity {
     @JoinColumn(name = "professor_id", nullable = false)
     private User professor;
 
-    @OneToOne(fetch = FetchType.LAZY) // 하나의 예약은 하나의 시간 슬롯과 1:1 매칭
+
+    // 기존 @OneToOne은 slot_id에 UNIQUE 제약을 걸어 재예약 시 충돌 발생
+    // 실제 요구사항은 하나의 Slot에 여러 Appointment 기록(취소 포함)이 남을 수 있음.
+    // 따라서 @ManyToOne으로 변경 → 여러 Appointment가 같은 Slot을 참조
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "slot_id", nullable = false)
     private AvailableSlot availableSlot;
 
@@ -91,7 +95,6 @@ public class Appointment extends BaseTimeEntity {
         this.status = AppointmentStatus.COMPLETED;
     }
 
-    // domain/Appointment.java
 
     /**
      * 학생이 예약 내용을 수정합니다. (시간, 주제, 메시지)

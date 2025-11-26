@@ -32,8 +32,8 @@ public class ProfessorController {
 
     @GetMapping
     public ResponseEntity<List<ProfessorListDto>> searchProfessors(
-            @RequestParam(required = false) String department,
-            @RequestParam(required = false) String name) {
+            @RequestParam(name = "department", required = false) String department,
+            @RequestParam(name = "name", required = false) String name) {
 
         List<ProfessorListDto> professors = professorQueryService.searchProfessors(department, name);
         return ResponseEntity.ok(professors);
@@ -48,7 +48,7 @@ public class ProfessorController {
      * @return 200 OK 상태 코드와 함께 교수의 상세 정보 DTO를 반환
      */
     @GetMapping("/{professorId}")
-    public ResponseEntity<ProfessorDetailDto> getProfessorDetails(@PathVariable Long professorId) {
+    public ResponseEntity<ProfessorDetailDto> getProfessorDetails(@PathVariable("professorId") Long professorId) {
         ProfessorDetailDto details = professorQueryService.getProfessorDetails(professorId);
         return ResponseEntity.ok(details);
     }

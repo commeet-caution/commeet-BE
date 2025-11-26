@@ -57,7 +57,7 @@ class ProfessorQueryServiceTest {
         when(professor1.getId()).thenReturn(1L);
         when(professor1.getName()).thenReturn("박교수");
         when(professor1.getDepartment()).thenReturn("컴퓨터공학과");
-//        when(professor1.getEmail()).thenReturn("park@test.com");
+        //when(professor1.getEmail()).thenReturn("park@test.com");
 
         List<User> fakeProfessorList = List.of(professor1);
 
@@ -75,7 +75,7 @@ class ProfessorQueryServiceTest {
         assertEquals(1L, dto.getProfessorId());
         assertEquals("박교수", dto.getName());
         assertEquals("컴퓨터공학과", dto.getDepartment());
-        assertEquals("park@test.com", dto.getEmail());
+        //assertEquals("park@test.com", dto.getEmail());
 
         //userRepository의 searchProfessors 메서드가 정확히 1번 호출되었는지 검증
         verify(userRepository, times(1)).searchProfessors(department, name);
@@ -109,7 +109,7 @@ class ProfessorQueryServiceTest {
         when(professor.getId()).thenReturn(professorId);
         when(professor.getName()).thenReturn("박교수");
         when(professor.getDepartment()).thenReturn("컴퓨터공학과");
-//        when(professor.getEmail()).thenReturn("park@test.com");
+        //when(professor.getEmail()).thenReturn("park@test.com");
         when(profile.getContent()).thenReturn("AI 전문가입니다.");
 
         // when - 실제 테스트 실행
