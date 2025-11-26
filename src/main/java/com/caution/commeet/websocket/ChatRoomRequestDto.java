@@ -7,6 +7,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChatRoomRequestDto {
 
-    private Long userId;
     private Long otherId;
 }

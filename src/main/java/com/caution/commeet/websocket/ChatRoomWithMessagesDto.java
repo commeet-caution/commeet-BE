@@ -8,8 +8,11 @@ import java.util.List;
 public class ChatRoomWithMessagesDto {
 
     private final Long roomNumber;
+
     private final Long userId;
+
     private final Long otherId;
+
     private final List<ChatMessageResponseDto> messages;
 
     public ChatRoomWithMessagesDto(ChatRoom chatRoom, List<ChatMessageResponseDto> messages) {

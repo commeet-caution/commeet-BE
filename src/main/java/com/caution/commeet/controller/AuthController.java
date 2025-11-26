@@ -3,9 +3,12 @@ package com.caution.commeet.controller;
 import com.caution.commeet.dto.AddUserRequest;
 import com.caution.commeet.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -15,33 +18,29 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public String register(@RequestBody AddUserRequest request) {
+    public ResponseEntity<Map<String, String>> register(@RequestBody AddUserRequest request) {
         userService.register(request);
-        return "success";
+        return ResponseEntity.ok(Map.of("message", "success"));
     }
 
     @PostMapping("/login-success")
-    @ResponseBody
-    public String loginSuccess() {
-        return "success";
+    public ResponseEntity<Map<String, String>> loginSuccess() {
+        return ResponseEntity.ok(Map.of("message", "success"));
     }
 
     @PostMapping("/login-fail")
-    @ResponseBody
-    public String loginFail() {
-        return "fail";
+    public ResponseEntity<Map<String, String>> loginFail() {
+        return ResponseEntity.ok(Map.of("message", "fail"));
     }
 
     @GetMapping("/session")
-    @ResponseBody
-    public Object getSessionUser() {
+    public ResponseEntity<Object> getSessionUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth.getPrincipal(); // CustomUserDetails
+        return ResponseEntity.ok(auth.getPrincipal());
     }
 
     @GetMapping("/logout-success")
-    @ResponseBody
-    public String logoutSuccess() {
-        return "logout success";
+    public ResponseEntity<Map<String, String>> logoutSuccess() {
+        return ResponseEntity.ok(Map.of("message", "logout success"));
     }
 }

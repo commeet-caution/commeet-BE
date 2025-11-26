@@ -49,4 +49,8 @@ public class UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("ID: " + id + " 에 해당하는 사용자가 없습니다."));
     }
+
+    public User getReferenceById(Long id) {
+        return userRepository.getReferenceById(id);
+    }
 }

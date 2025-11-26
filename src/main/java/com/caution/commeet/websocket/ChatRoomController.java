@@ -1,61 +1,53 @@
 package com.caution.commeet.websocket;
 
+import com.caution.commeet.domain.CustomUserDetails;
 import com.caution.commeet.domain.User;
-import com.caution.commeet.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
+@RequestMapping("/chatting")
 @RequiredArgsConstructor
 public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
-    private final ChatMessageService chatMessageService;
-    private final UserService userService;
 
+    // 채팅방 생성 또는 기존 채팅방 반환
+    @PostMapping("room")
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/chatting/room")
-    public ResponseEntity<ChatRoomWithMessagesDto> makeRoom(@AuthenticationPrincipal User principalUser,
-                                                            @RequestBody ChatRoomRequestDto chatRoomRequestDto) {
-        // 1. 현재 로그인 유저를 DB에서 다시 조회 (영속 상태 보장)
-        User user = userService.findById(principalUser.getId());
+    public ResponseEntity<ChatRoomWithMessagesDto> makeRoom(@RequestBody ChatRoomRequestDto requestDto,
+                                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        // 2. 상대 유저도 조회
-        User other = userService.findById(chatRoomRequestDto.getOtherId());
+        User currentUser = userDetails.getUser();
 
-        Optional<ChatRoom> optionalChatRoom = chatRoomService.findByUserAndOther(user, other);
+        ChatRoomWithMessagesDto roomInfo = chatRoomService.getOrCreateRoom(currentUser, requestDto.getOtherId());
 
-        if (optionalChatRoom.isPresent()) {
-            ChatRoom foundChatRoom = optionalChatRoom.get();
-            List<ChatMessageResponseDto> messages = chatMessageService.findMessages(foundChatRoom.getRoomNumber());
-            return ResponseEntity.ok(new ChatRoomWithMessagesDto(foundChatRoom, messages));
-        } else {
-            ChatRoom newChatRoom = chatRoomService.createRoom(user, other);
-            return ResponseEntity.ok(new ChatRoomWithMessagesDto(newChatRoom, new ArrayList<>()));
-        }
+        return ResponseEntity.ok(roomInfo);
     }
 
-
     // 사용자가 속한 채팅방 목록 조회
+    @GetMapping("/rooms")
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/chatting/rooms")
-    public ResponseEntity<List<ChatRoomWithMessagesDto>> findAll(@AuthenticationPrincipal User user) {
-        List<ChatRoomWithMessagesDto> chatRooms = chatRoomService.findByUserId(user.getId());
+    public ResponseEntity<List<ChatRoomWithMessagesDto>> getUserChatRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        List<ChatRoomWithMessagesDto> chatRooms = chatRoomService.getChatRoomsByUserId(userDetails.getUser().getId());
+
         return ResponseEntity.ok(chatRooms);
     }
 
     //채팅방 삭제
+    @DeleteMapping("/rooms/{roomNumber}")
     @PreAuthorize("isAuthenticated()")
-    @DeleteMapping("/chatting/rooms/{roomNumber}")
-    public ResponseEntity<String> deleteRoom(@AuthenticationPrincipal User user, @PathVariable Long roomNumber) {
-        chatRoomService.deleteRoom(user, roomNumber);
+    public ResponseEntity<String> deleteChatRoom(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                             @PathVariable Long roomNumber) {
+
+        chatRoomService.deleteChatRoom(userDetails, roomNumber);
+
         return ResponseEntity.ok("채팅방이 삭제되었습니다.");
     }
 }

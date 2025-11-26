@@ -85,7 +85,7 @@ public class SocketHandler implements WebSocketHandler {
                         .build();
             }
 
-            chatMessageService.save(requestDto);
+            chatMessageService.saveMessage(requestDto);
             log.info("메시지 저장 완료: {}", requestDto.getMessage());
 
             // 저장 후 보내는 메시지는 JSON 문자열로 보내는 게 좋음

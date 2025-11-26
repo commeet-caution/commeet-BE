@@ -8,29 +8,32 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
 
+    // 특정 채팅방의 메시지 전체 조회
     @Transactional
-    public List<ChatMessageResponseDto> findMessages(Long roomNumber) {
+    public List<ChatMessageResponseDto> getMessagesByRoomNumber(Long roomNumber) {
         return chatMessageRepository.findByRoomNumber(roomNumber)
                 .stream()
                 .map(ChatMessageResponseDto::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 
+    // 메시지 저장
     @Transactional
-    public void save(final ChatMessageRequestDto requestDto) {
+    public void saveMessage(ChatMessageRequestDto requestDto) {
         ChatMessage chatMessage = requestDto.toEntity();
         chatMessageRepository.save(chatMessage);
     }
 
+    // 특정 채팅방의 메시지 전체 삭제
     @Transactional
-    public void deleteByRoomNumber(Long roomNumber) {
+    public void deleteMessagesByRoomNumber(Long roomNumber) {
         chatMessageRepository.deleteByRoomNumber(roomNumber);
     }
 }

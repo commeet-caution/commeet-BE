@@ -5,13 +5,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
+@Table(name = "chat_message")
 @Getter
 @NoArgsConstructor
-@Table(name = "chat_message")
-public class ChatMessage {
+public class ChatMessage extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,24 +18,20 @@ public class ChatMessage {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "message")
-    private String message;
-
     @Column(name = "room_number")
     private Long roomNumber;
+
+    @Column(name = "message")
+    private String message;
 
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "created_time")
-    private LocalDateTime createdTime;
-
     @Builder
-    public ChatMessage(Long userId, String message, String imageUrl, Long roomNumber) {
+    public ChatMessage(Long userId, Long roomNumber, String message, String imageUrl) {
         this.userId = userId;
-        this.message = message;
         this.roomNumber = roomNumber;
+        this.message = message;
         this.imageUrl = imageUrl;
-        this.createdTime = LocalDateTime.now();
     }
 }

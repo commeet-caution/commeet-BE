@@ -6,11 +6,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
 @Entity
+@Table(name = "chat_room")
 @Getter
 @NoArgsConstructor
-@Table(name = "chat_room")
 public class ChatRoom extends BaseTimeEntity {
 
     @Id
