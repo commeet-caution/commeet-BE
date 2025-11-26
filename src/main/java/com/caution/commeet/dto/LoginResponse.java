@@ -8,7 +8,8 @@ import lombok.Setter;
 @Setter
 public class LoginResponse {
     private Long Id;
-    private String password;
+    private String loginId;
+    private String name;
     private String university;
     private String department;
     private UserRole role;

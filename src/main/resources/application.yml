@@ -5,26 +5,26 @@ spring:
       hibernate:
         format_sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update # update, create
     defer-datasource-initialization: true
   #  로컬 테스트용
-#  datasource:
-#    url: jdbc:h2:mem:testdb
-#    username: sa
-#
-#  h2:
-#    console:
-#      enabled: true
-
   datasource:
-    url: ${SPRING_DATASOURCE_URL}          # EB 환경 변수에서 주입
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:h2:mem:testdb
+    username: sa
 
-    h2:
-      console:
-        enabled: false                        # 서버 환경에서는 H2 비활성화
+  h2:
+    console:
+      enabled: true
+
+#  datasource:
+#    url: ${SPRING_DATASOURCE_URL}          # EB 환경 변수에서 주입
+#    username: ${SPRING_DATASOURCE_USERNAME}
+#    password: ${SPRING_DATASOURCE_PASSWORD}
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#
+#    h2:
+#      console:
+#        enabled: false                        # 서버 환경에서는 H2 비활성화
 
     sql:
       init:
